@@ -270,11 +270,23 @@ function handleOutsideClick(event) {
 // UI updates
 function updateUI() {
     if (state.activities.length > 0) {
+        // Hide connect button when authenticated and showing activities
+        elements.authContainer.classList.add('hidden');
+        
+        // Show stats and forest
         elements.activityCount.textContent = `Each tree represents one of your ${state.activities.length} activities`;
         updateStats();
         renderForest();
         elements.statsContainer.classList.remove('hidden');
         elements.forestContainer.classList.remove('hidden');
+    } else {
+        // Show connect button when not authenticated
+        elements.authContainer.classList.remove('hidden');
+        elements.connectButton.classList.remove('hidden');
+        
+        // Hide stats and forest
+        elements.statsContainer.classList.add('hidden');
+        elements.forestContainer.classList.add('hidden');
     }
 }
 
@@ -309,6 +321,14 @@ function renderForest() {
 function setLoading(loading) {
     state.isLoading = loading;
     elements.loadingContainer.classList.toggle('hidden', !loading);
+    
+    // Hide connect button while loading
+    if (loading) {
+        elements.authContainer.classList.add('hidden');
+    } else if (!state.isAuthenticated) {
+        elements.authContainer.classList.remove('hidden');
+    }
+    
     if (loading && loadingAnimation) {
         loadingAnimation.play();
     } else if (loadingAnimation) {
@@ -332,9 +352,8 @@ function init() {
     // Initialize Lottie animation first
     initLoadingAnimation();
     
-    // Set up event listeners and check authentication
+    // Set up event listeners
     elements.connectButton.addEventListener('click', handleLogin);
-    elements.connectButton.classList.remove('hidden');
     
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
@@ -344,6 +363,7 @@ function init() {
     
     if (error) {
         showError('Authentication failed. Please try again.');
+        updateUI(); // Show connect button
         return;
     }
     
@@ -370,8 +390,14 @@ function init() {
             checkAndRefreshToken().then(validToken => {
                 if (validToken) {
                     fetchActivities(validToken);
+                } else {
+                    // If token refresh failed, show connect button
+                    updateUI();
                 }
             });
+        } else {
+            // No stored token, show connect button
+            updateUI();
         }
     }
 }
