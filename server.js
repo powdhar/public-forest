@@ -8,19 +8,15 @@ app.use(express.json());
 app.get('/api/auth-url', (req, res) => {
   const clientId = process.env.STRAVA_CLIENT_ID;
   
-  // Handle different URL formats for Vercel
-  let baseUrl;
-  if (process.env.VERCEL_URL) {
-    // Remove any preview deployment specific parts
-    const cleanVercelUrl = process.env.VERCEL_URL.replace(/-[^.]+\.vercel\.app$/, '.vercel.app');
-    baseUrl = `https://${cleanVercelUrl}`;
-  } else {
-    baseUrl = 'http://localhost:3000';
-  }
-  
+  // Use the correct production URL
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://public-forest.vercel.app'
+    : 'http://localhost:3000';
+    
   const redirectUri = `${baseUrl}/api/callback`;
   const scope = 'activity:read_all';
   
+  console.log('Environment:', process.env.NODE_ENV);
   console.log('Redirect URI:', redirectUri); // Debug log
   
   const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
