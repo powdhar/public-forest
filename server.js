@@ -43,42 +43,17 @@ app.get('/api/callback', async (req, res) => {
 
     const data = await response.json();
     
-    if (data.errors) {
-      console.error('Strava API Error:', data.errors);
+    if (data.errors || !data.access_token) {
+      console.error('Strava API Error:', data);
       res.redirect('/?error=auth_failed');
       return;
     }
     
-    res.redirect(`/?code=${code}`);
+    // Redirect with the access token
+    res.redirect(`/?access_token=${data.access_token}&refresh_token=${data.refresh_token}&expires_in=${data.expires_in}`);
   } catch (error) {
     console.error('Error:', error);
     res.redirect('/?error=auth_failed');
-  }
-});
-
-// Token exchange endpoint
-app.post('/api/token-exchange', async (req, res) => {
-  const { code } = req.body;
-  
-  try {
-    const response = await fetch('https://www.strava.com/oauth/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        client_id: process.env.STRAVA_CLIENT_ID,
-        client_secret: process.env.STRAVA_CLIENT_SECRET,
-        code,
-        grant_type: 'authorization_code',
-      }),
-    });
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Token exchange failed' });
   }
 });
 

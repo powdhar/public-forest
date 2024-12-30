@@ -275,7 +275,6 @@ function updateUI() {
         renderForest();
         elements.statsContainer.classList.remove('hidden');
         elements.forestContainer.classList.remove('hidden');
-        elements.authContainer.classList.add('hidden');
     }
 }
 
@@ -335,24 +334,45 @@ function init() {
     
     // Set up event listeners and check authentication
     elements.connectButton.addEventListener('click', handleLogin);
+    elements.connectButton.classList.remove('hidden');
     
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
+    const accessToken = urlParams.get('access_token');
+    const refreshToken = urlParams.get('refresh_token');
+    const expiresIn = urlParams.get('expires_in');
+    const error = urlParams.get('error');
     
-    if (code) {
-        exchangeToken(code);
-        window.history.replaceState({}, document.title, window.location.pathname);
+    if (error) {
+        showError('Authentication failed. Please try again.');
+        return;
     }
     
-    const token = localStorage.getItem('stravaAccessToken');
-    if (token) {
+    if (accessToken) {
+        // Store the tokens
+        localStorage.setItem('stravaAccessToken', accessToken);
+        localStorage.setItem('stravaRefreshToken', refreshToken);
+        localStorage.setItem('stravaTokenExpiry', Date.now() + (parseInt(expiresIn) * 1000));
+        
+        // Update state
+        state.accessToken = accessToken;
         state.isAuthenticated = true;
-        state.accessToken = token;
-        checkAndRefreshToken().then(validToken => {
-            if (validToken) {
-                fetchActivities(validToken);
-            }
-        });
+        
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Fetch activities
+        fetchActivities(accessToken);
+    } else {
+        const storedToken = localStorage.getItem('stravaAccessToken');
+        if (storedToken) {
+            state.isAuthenticated = true;
+            state.accessToken = storedToken;
+            checkAndRefreshToken().then(validToken => {
+                if (validToken) {
+                    fetchActivities(validToken);
+                }
+            });
+        }
     }
 }
 
