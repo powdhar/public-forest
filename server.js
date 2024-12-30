@@ -7,11 +7,39 @@ app.use(express.json());
 // Get auth URL endpoint
 app.get('/api/auth-url', (req, res) => {
   const clientId = process.env.STRAVA_CLIENT_ID;
-  const redirectUri = `${process.env.VERCEL_URL || 'http://localhost:3000'}/api/callback`;
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+  const redirectUri = `${baseUrl}/api/callback`;
   const scope = 'activity:read_all';
   
   const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
   res.json({ authUrl });
+});
+
+// Add back the callback endpoint
+app.get('/api/callback', async (req, res) => {
+  const { code } = req.query;
+  
+  try {
+    const response = await fetch('https://www.strava.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: process.env.STRAVA_CLIENT_ID,
+        client_secret: process.env.STRAVA_CLIENT_SECRET,
+        code,
+        grant_type: 'authorization_code',
+      }),
+    });
+
+    const data = await response.json();
+    // Redirect to the frontend with the token
+    res.redirect(`/?code=${code}`);
+  } catch (error) {
+    console.error('Error:', error);
+    res.redirect('/?error=auth_failed');
+  }
 });
 
 // Token exchange endpoint
