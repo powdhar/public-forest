@@ -7,9 +7,14 @@ app.use(express.json());
 // Get auth URL endpoint
 app.get('/api/auth-url', (req, res) => {
   const clientId = process.env.STRAVA_CLIENT_ID;
-  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+  // Handle protocol and URL properly for both development and production
+  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+  const host = process.env.VERCEL_URL || 'localhost:3000';
+  const baseUrl = `${protocol}://${host}`;
   const redirectUri = `${baseUrl}/api/callback`;
   const scope = 'activity:read_all';
+  
+  console.log('Redirect URI:', redirectUri); // Debug log
   
   const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
   res.json({ authUrl });
@@ -34,7 +39,13 @@ app.get('/api/callback', async (req, res) => {
     });
 
     const data = await response.json();
-    // Redirect to the frontend with the token
+    
+    if (data.errors) {
+      console.error('Strava API Error:', data.errors);
+      res.redirect('/?error=auth_failed');
+      return;
+    }
+    
     res.redirect(`/?code=${code}`);
   } catch (error) {
     console.error('Error:', error);
