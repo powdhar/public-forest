@@ -37,6 +37,10 @@ body {
     max-width: 56rem;
 }
 
+p#activity-count {
+    margin-bottom: 16px;
+}
+
 .card-header {
     padding: 1.5rem;
     border-bottom: 1px solid var(--primary);
