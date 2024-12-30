@@ -16,6 +16,13 @@
       "dest": "server.js"
     },
     {
+      "src": "/styles.css",
+      "dest": "/public/styles.css",
+      "headers": {
+        "Content-Type": "text/css"
+      }
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/$1"
     }
