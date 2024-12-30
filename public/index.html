@@ -7,38 +7,62 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap" rel="stylesheet">
-    <title>Strava Activity Viewer</title>
-    <style>
-        .activity {
-            border: 1px solid #ddd;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        #error {
-            color: red;
-            display: none;
-            margin: 10px 0;
-        }
-        #athlete-info {
-            display: none;
-            margin: 20px 0;
-        }
-    </style>
+    <title>Strava Forest</title>
 </head>
 <body>
-    <h1>Strava Activity Viewer</h1>
-    
-    <div id="error"></div>
-    
-    <div id="athlete-info">
-        <h2>Welcome, <span id="athlete-name"></span>!</h2>
-    </div>
-    
-    <button id="connect-button" onclick="connectWithStrava()">Connect with Strava</button>
-    
-    <div id="activities"></div>
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Strava Forest</h1>
+            <p class="subtitle">The best time to plant a tree was 20 years ago. The second best time is now.</p>
+        </div>
+        
+        <div class="card-content">
+            <p class="subtitle" id="activity-count">Connect to see your activities</p>
+            <div class="space-y-6">
+                <!-- Authentication Button -->
+                <div id="auth-container">
+                    <button id="strava-connect" class="button hidden">Connect with Strava</button>
+                </div>
 
+                <!-- Loading State -->
+                <div id="loading-container" class="text-center hidden">
+                    <div id="lottie-loading" class="w-32 h-32 mx-auto"></div>
+                </div>
+                
+                <!-- Error Message -->
+                <div id="error-container" class="alert hidden">
+                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p id="error-message"></p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div id="stats-container" class="stats-grid hidden">
+                    <div class="stat-card">
+                        <h4>Total Activities</h4>
+                        <p id="total-activities">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Total Distance</h4>
+                        <p id="total-distance">0 km</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Total Time</h4>
+                        <p id="total-time">0 hours</p>
+                    </div>
+                </div>
+
+                <!-- Tree Grid -->
+                <div id="forest-container" class="forest-container hidden">
+                    <div id="tree-grid" class="tree-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script src="/script.js"></script>
 </body>
 </html>
