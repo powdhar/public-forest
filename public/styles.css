@@ -229,4 +229,8 @@ p#activity-count {
     body {
         padding: 1rem;
     }
+
+    .card-title {
+        font-size: 32px;
+    }
 }
